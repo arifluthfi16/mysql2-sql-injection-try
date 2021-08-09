@@ -1,0 +1,119 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    title KSI SQL Injection
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous")
+    link(rel="stylesheet" href="main.css")
+  body
+    main.container-fluid(role="main" style="padding: 60px;")
+      div.row
+        div.col
+          h3 Tanpa Pengaman SQL Injection
+          form.mt-5
+            div.form-group
+              div.row
+                div.col-11
+                  input#input-tanpa.form-control(type="text" placeholder="Nama Depan Customer")
+                div.col-1
+                  button#button-tanpa.btn.btn-primary.btn-block 🔎 
+          table#table-tanpa.table.table-bordered.table-stripped.mt-3
+            thead.table-primary
+              tr
+                th(scope="col") Firstname
+                th(scope="col") Lastname
+                th(scope="col") Email
+                th(scope="col") Is Active
+        div.col
+          h3 Dengan Pengaman SQL Injection
+          form.mt-5
+            div.form-group
+              div.row
+                div.col-11
+                  input#input-dengan.form-control(type="text" placeholder="Nama Customer")
+                div.col-1
+                  button#button-dengan.btn.btn-primary.btn-block 🔎 
+          table#table-dengan.table.table-bordered.table-stripped.mt-3
+            thead.table-primary
+              tr
+                th(scope="col") Firstname
+                th(scope="col") Lastname
+                th(scope="col") Email
+                th(scope="col") Is Active
+          
+                  
+        
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous")
+    script.
+      let buttonTanpa = document.getElementById("button-tanpa");
+      let tableTanpa = document.getElementById("table-tanpa");
+      let inputTanpa = document.getElementById("input-tanpa");
+
+      let buttonDengan = document.getElementById("button-dengan");
+      let tableDengan = document.getElementById("table-dengan");
+      let inputDengan = document.getElementById("input-dengan");
+
+      function cleanTable(table){
+        var tableHeaderRowCount = 1;
+        var rowCount = table.rows.length;
+        for (var i = tableHeaderRowCount; i < rowCount; i++) {
+            table.deleteRow(tableHeaderRowCount);
+        }
+      }
+
+      buttonTanpa.addEventListener("click", function(event) {
+        event.preventDefault();
+        let query = inputTanpa.value
+        cleanTable(tableTanpa);
+        fetch(`http://localhost:3000/customer`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({id : query})
+        })
+        .then(response => response.json())
+        .then((data) => {
+          const tbody = document.createElement('tbody');
+          data.data.forEach((el,i)=>{
+              let rowNode = document.createElement("tr");
+              for (let key in el){
+                let cell = document.createElement("td");
+                cell.innerHTML = el[key]
+                rowNode.appendChild(cell)
+              }
+              tbody.appendChild(rowNode);
+          });
+          tableTanpa.appendChild(tbody)
+        });
+      })
+
+      buttonDengan.addEventListener("click", function(event) {
+        event.preventDefault();
+        let query = inputDengan.value
+        cleanTable(tableDengan);
+        fetch(`http://localhost:3000/customer-prepared`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({id : query})
+        })
+        .then(response => response.json())
+        .then((data) => {
+          const tbody = document.createElement('tbody');
+          data.data.forEach((el,i)=>{
+              let rowNode = document.createElement("tr");
+              for (let key in el){
+                let cell = document.createElement("td");
+                cell.innerHTML = el[key]
+                rowNode.appendChild(cell)
+              }
+              tbody.appendChild(rowNode);
+          });
+          tableDengan.appendChild(tbody)
+        });
+      })
